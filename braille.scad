@@ -3,8 +3,9 @@ dotdiameter = 1.44;
 dotspacing = 2.34;
 cellspacing = 6.2;
 margin = 3.5;
+linetoline = 10;
 
-_ = 0;
+_ = 0; // space
 
 a = 1;
 b = 3;
@@ -36,34 +37,37 @@ z = 17 + 4 + 32;
 
 w = 26 + 32;
 
-COMMA = 2;
-AT = 8;
-SLASH = 12;
-COLON = 18;
-BANG = 22;
-CAP = 32;
-HYPHEN = 36;
-QMARK = 38;
-PLUS = 44;
-DOT = 50;
-HASH = 60;
+COMMA = 2; // ,
+AT = 8; // @
+SLASH = 12; // /
+COLON = 18; // :
+BANG = 22; // !
+CAP = 32; // [capitalize the following letter]
+HYPHEN = 36; // -
+QMARK = 38; // ?
+PLUS = 44; // +
+DOT = 50; // .
+HASH = 60; // #
 
-
-string = [CAP,h,e,l,l,o,COMMA,_,w,o,r,l,d,BANG];
-
+string = [
+	[CAP,h,e,l,l,o,COMMA,_,w,o,r,l,d,BANG],
+	[CAP,h,e,l,l,o,BANG],
+	[CAP,w,o,r,l,d,BANG]
+];
 
 module braillechar(letter = w, $fs = .2, $fa = .2) {
 	for(i = [0:5]) if((floor(letter / pow(2, i)) % 2)) translate([floor(i / 3) * dotspacing, (i % 3) * -dotspacing, 0]) scale([1, 1, 2 * dotheight/dotdiameter]) rotate([90, 0, 0]) sphere(d = dotdiameter);
 }
+
 module braillestr(string) {
-	for(ind = [0:100]) translate([ind * cellspacing, 0, 0]) braillechar(string[ind]);
+	for(i = [0:100]) translate([i * cellspacing, 0, 0]) braillechar(string[i]);
 }
 
 rotate([90, 0, 0]) {
-	translate([margin, dotspacing * 2 + margin, 0]) braillestr(string);
+	for(i = [0:len(string) - 1]) translate([margin, dotspacing * 2 + margin + (len(string) - i - 1) * linetoline, 0]) braillestr(string[i]);
 	translate([0, 0, -5]) difference() {
-		cube([dotspacing + cellspacing * (len(string) - 1) + margin * 2, dotspacing * 2 + margin * 2, 5]);
-		translate([0, margin + dotspacing * 2, -1]) rotate(45) cube([margin * sqrt(2), margin, 7]);
+		cube([dotspacing + cellspacing * (max([for(i = [0:len(string) - 1]) len(string[i])]) - 1) + margin * 2, dotspacing * 2 + margin * 2 + linetoline * (len(string) - 1), 5]);
+		translate([0, margin + dotspacing * 2 + linetoline * (len(string) - 1), -1]) rotate(45) cube([margin * sqrt(2), margin, 7]);
 	}
 }
 
